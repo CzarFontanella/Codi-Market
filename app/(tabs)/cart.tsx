@@ -4,12 +4,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function TabTwoScreen() {
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <ThemedView style={{ flex: 1 }}></ThemedView>
-    </SafeAreaView>
+      <ThemedView style={styles.container}>
+
+      </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-
+  container :{
+    flex: 1,
+  },
 });
