@@ -107,7 +107,7 @@ export default function HomeScreen() {
                   disabled={outOfStock || quantity === 0}
                 >
                   <AntDesign
-                    name="shoppingcart"
+                    name="shopping-cart"
                     size={22}
                     color="#fff"
                   />
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
     paddingBottom: Platform.select({ ios: 32, default: 0 }),
   },
   itemCard: {
-    width: "48%",
+    width: "47%",
     margin: 4,
     padding: 8,
     backgroundColor: "#f0f0f0",
