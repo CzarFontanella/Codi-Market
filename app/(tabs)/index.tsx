@@ -1,5 +1,5 @@
 import { ThemedView } from "@/components/ThemedView";
-import { AntDesign } from "@expo/vector-icons";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -7,12 +7,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
 // Ajuste o caminho conforme a localização do seu arquivo firebase.ts/js
 import { collection, getDocs, getFirestore } from "firebase/firestore";
 import { app } from "../../firebase";
+import { useCart } from "@/components/ui/CartContext";
+
 
 export default function HomeScreen() {
   // Estado para armazenar os produtos do Firebase
   const [products, setProducts] = useState<any[]>([]);
   // Estado para armazenar a quantidade de cada item (agora pode começar em zero)
   const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
+
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -45,11 +49,6 @@ export default function HomeScreen() {
     }));
   };
 
-  const addToCart = (itemId: string) => {
-    // Lógica para adicionar ao carrinho
-    // Exemplo: alert(`Adicionado ${quantities[itemId]} do item ${itemId} ao carrinho`);
-  };
-
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
@@ -58,7 +57,7 @@ export default function HomeScreen() {
             flexDirection: "row",
             flexWrap: "wrap",
             justifyContent: "space-between",
-            paddingBottom: 32, // Add padding to avoid overlap with tab bar
+            paddingHorizontal: 8,
           }}
         >
           {products.map((product) => {
@@ -103,12 +102,15 @@ export default function HomeScreen() {
                         outOfStock || quantity === 0 ? "#ccc" : "#007AFF",
                     },
                   ]}
-                  onPress={() => addToCart(product.id)}
+                  onPress={() => {
+                    addToCart(product, quantity)
+                    alert(`${quantity} x ${product.name} adicionado(s) ao carrinho!`);
+                  }}
                   disabled={outOfStock || quantity === 0}
                 >
-                  <AntDesign
+                  <FontAwesome5
                     name="shopping-cart"
-                    size={22}
+                    size={24}
                     color="#fff"
                   />
                 </TouchableOpacity>
@@ -127,8 +129,8 @@ const styles = StyleSheet.create({
     paddingBottom: Platform.select({ ios: 32, default: 0 }),
   },
   itemCard: {
-    width: "47%",
-    margin: 4,
+    width: "49%",
+    marginBlock: 4,
     padding: 8,
     backgroundColor: "#f0f0f0",
     borderRadius: 8,
