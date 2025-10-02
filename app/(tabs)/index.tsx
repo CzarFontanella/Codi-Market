@@ -5,9 +5,9 @@ import { Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View }
 import { SafeAreaView } from "react-native-safe-area-context";
 // Firebase imports
 // Ajuste o caminho conforme a localização do seu arquivo firebase.ts/js
+import { useCart } from "@/components/ui/CartContext";
 import { collection, getDocs, getFirestore } from "firebase/firestore";
 import { app } from "../../firebase";
-import { useCart } from "@/components/ui/CartContext";
 
 
 export default function HomeScreen() {
@@ -16,7 +16,7 @@ export default function HomeScreen() {
   // Estado para armazenar a quantidade de cada item (agora pode começar em zero)
   const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
 
-  const { addToCart } = useCart();
+  const { addToCart, cart } = useCart();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -35,6 +35,12 @@ export default function HomeScreen() {
     fetchProducts();
   }, []);
 
+  // Calcula o estoque disponível com base no carrinho
+  const getAvailableStock = (productId: string, originalStock: number) => {
+    const cartItem = cart.find((item: any) => item.id === productId);
+    return originalStock - (cartItem?.quantity ?? 0);
+  };
+
   const increment = (itemId: string) => {
     setQuantities((prev) => ({
       ...prev,
@@ -49,6 +55,17 @@ export default function HomeScreen() {
     }));
   };
 
+  // Atualize handleAddToCart para não mexer mais em localStock
+  const handleAddToCart = (product: any, quantity: number) => {
+    if (quantity === 0) return;
+    addToCart(product, quantity);
+    setQuantities((prev) => ({
+      ...prev,
+      [product.id]: 0,
+    }));
+    alert(`${quantity} x ${product.name} adicionado(s) ao carrinho!`);
+  };
+
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
@@ -61,7 +78,8 @@ export default function HomeScreen() {
           }}
         >
           {products.map((product) => {
-            const stock = Number(product.stock) || 0;
+            const originalStock = Number(product.stock) || 0;
+            const stock = getAvailableStock(product.id, originalStock);
             const quantity = quantities[product.id] || 0;
             const outOfStock = stock === 0;
             return (
@@ -76,7 +94,10 @@ export default function HomeScreen() {
                   <View style={styles.quantitySelector}>
                     <TouchableOpacity
                       onPress={() => decrement(product.id)}
-                      style={styles.quantityButton}
+                      style={[
+                        styles.quantityButton,
+                        quantity === 0 && { backgroundColor: "#ccc" },
+                      ]}
                       disabled={quantity === 0}
                     >
                       <Text style={styles.quantityButtonText}>-</Text>
@@ -86,7 +107,10 @@ export default function HomeScreen() {
                       onPress={() => {
                         if (quantity < stock) increment(product.id);
                       }}
-                      style={styles.quantityButton}
+                      style={[
+                        styles.quantityButton,
+                        quantity >= stock && { backgroundColor: "#ccc" },
+                      ]}
                       disabled={quantity >= stock}
                     >
                       <Text style={styles.quantityButtonText}>+</Text>
@@ -102,10 +126,7 @@ export default function HomeScreen() {
                         outOfStock || quantity === 0 ? "#ccc" : "#007AFF",
                     },
                   ]}
-                  onPress={() => {
-                    addToCart(product, quantity)
-                    alert(`${quantity} x ${product.name} adicionado(s) ao carrinho!`);
-                  }}
+                  onPress={() => handleAddToCart(product, quantity)}
                   disabled={outOfStock || quantity === 0}
                 >
                   <FontAwesome5
