@@ -1,9 +1,8 @@
 import { ThemedView } from "@/components/ThemedView";
-import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { useNavigation, NavigationProp } from "@react-navigation/native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import React, { useRef } from "react";
 import {
-  Alert,
   FlatList,
   Image,
   Platform,
@@ -69,7 +68,11 @@ export default function TabTwoScreen() {
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
-        <TouchableOpacity onPressIn={handlePressIn} onPressOut={handlePressOut}>
+        <TouchableOpacity
+          activeOpacity={1}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+        >
           <View style={styles.logo}>
             <FontAwesome5 name="shopping-cart" size={32} color="#fff" />
           </View>

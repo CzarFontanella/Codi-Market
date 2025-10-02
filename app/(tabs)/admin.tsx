@@ -1,7 +1,15 @@
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useFocusEffect } from "@react-navigation/native";
-import { addDoc, collection, deleteDoc, doc, getDocs, getFirestore, updateDoc } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  getFirestore,
+  updateDoc,
+} from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
@@ -17,8 +25,6 @@ import {
   View,
 } from "react-native";
 import { app } from "../../firebase";
-
-const ADMIN_PASSWORD = "admin123"; // Troque para sua senha segura
 
 export default function AdminScreen() {
   const [authenticated, setAuthenticated] = useState(false);
@@ -149,11 +155,26 @@ export default function AdminScreen() {
         />
         <Button
           title="Entrar"
-          onPress={() => {
-            if (password === ADMIN_PASSWORD) {
-              setAuthenticated(true);
-            } else {
-              Alert.alert("Senha incorreta!");
+          onPress={async () => {
+            try {
+              setLoading(true);
+              const adminSnapshot = await getDocs(collection(db, "ADMIN"));
+              let valid = false;
+              adminSnapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                if (data && data.password && password === data.password) {
+                  valid = true;
+                }
+              });
+              setLoading(false);
+              if (valid) {
+                setAuthenticated(true);
+              } else {
+                Alert.alert("Senha incorreta!");
+              }
+            } catch (e) {
+              setLoading(false);
+              Alert.alert("Erro ao autenticar.");
             }
           }}
         />
@@ -162,10 +183,18 @@ export default function AdminScreen() {
   }
 
   return (
-    <ThemedView style={{ flex: 1, padding: 16, paddingTop: Platform.select({ ios: 48, default: 16 }) }}>
+    <ThemedView
+      style={{
+        flex: 1,
+        padding: 16,
+        paddingTop: Platform.select({ ios: 48, default: 16 }),
+      }}
+    >
       <ThemedText style={styles.title}>Gerenciar Produtos</ThemedText>
       <TouchableOpacity style={styles.addBtn} onPress={openAddModal}>
-        <Text style={{ color: "#fff", fontWeight: "bold" }}>Adicionar Produto</Text>
+        <Text style={{ color: "#fff", fontWeight: "bold" }}>
+          Adicionar Produto
+        </Text>
       </TouchableOpacity>
       <FlatList
         data={products}
@@ -175,24 +204,33 @@ export default function AdminScreen() {
         renderItem={({ item }) => (
           <View style={styles.itemRow}>
             {/* Imagem do produto */}
-            <Image
-              source={{ uri: item.image }}
-              style={styles.itemImage}
-            />
+            <Image source={{ uri: item.image }} style={styles.itemImage} />
             <View style={{ flex: 1 }}>
               <Text style={styles.itemText}>{item.name}</Text>
-              <Text style={styles.itemText}>Preço: R${Number(item.price).toFixed(2)}</Text>
+              <Text style={styles.itemText}>
+                Preço: R${Number(item.price).toFixed(2)}
+              </Text>
               <Text style={styles.itemText}>Estoque: {item.stock}</Text>
             </View>
-            <TouchableOpacity style={styles.editBtn} onPress={() => startEdit(item)}>
+            <TouchableOpacity
+              style={styles.editBtn}
+              onPress={() => startEdit(item)}
+            >
               <Text style={{ color: "#fff" }}>Editar</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.deleteBtn} onPress={() => handleDelete(item.id)}>
+            <TouchableOpacity
+              style={styles.deleteBtn}
+              onPress={() => handleDelete(item.id)}
+            >
               <Text style={{ color: "#fff" }}>Excluir</Text>
             </TouchableOpacity>
           </View>
         )}
-        ListEmptyComponent={<Text style={{ textAlign: "center", marginTop: 32 }}>Nenhum produto cadastrado.</Text>}
+        ListEmptyComponent={
+          <Text style={{ textAlign: "center", marginTop: 32 }}>
+            Nenhum produto cadastrado.
+          </Text>
+        }
       />
 
       {/* Modal para adicionar/editar produto */}
@@ -204,7 +242,9 @@ export default function AdminScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.title}>{editing ? "Editar Produto" : "Adicionar Produto"}</Text>
+            <Text style={styles.title}>
+              {editing ? "Editar Produto" : "Adicionar Produto"}
+            </Text>
             <TextInput
               placeholder="Nome"
               value={form.name}
@@ -231,7 +271,9 @@ export default function AdminScreen() {
               onChangeText={(v) => setForm((f) => ({ ...f, image: v }))}
               style={styles.input}
             />
-            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+            <View
+              style={{ flexDirection: "row", justifyContent: "space-between" }}
+            >
               <Button
                 title={editing ? "Salvar Alterações" : "Adicionar"}
                 onPress={editing ? handleEdit : handleAdd}
@@ -242,7 +284,13 @@ export default function AdminScreen() {
                 onPress={() => {
                   setEditing(false);
                   setModalVisible(false);
-                  setForm({ id: "", name: "", price: "", stock: "", image: "" });
+                  setForm({
+                    id: "",
+                    name: "",
+                    price: "",
+                    stock: "",
+                    image: "",
+                  });
                 }}
               />
             </View>
