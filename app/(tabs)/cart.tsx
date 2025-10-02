@@ -1,4 +1,5 @@
 import { ThemedView } from "@/components/ThemedView";
+import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { FontAwesome5 } from "@expo/vector-icons";
 import React, { useRef } from "react";
 import {
@@ -14,15 +15,21 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCart } from "../../components/ui/CartContext";
 
+type RootStackParamList = {
+  admin: undefined;
+  // add other routes here if needed
+};
+
 export default function TabTwoScreen() {
   const { cart, updateQuantity, removeFromCart } = useCart();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handlePressIn = () => {
     // Inicia o timer de 10 segundos
     timerRef.current = setTimeout(() => {
-      Alert.alert("Ação executada!", "Você segurou por 10 segundos!");
+      navigation.navigate("admin");
     }, 10000);
   };
 
@@ -62,10 +69,7 @@ export default function TabTwoScreen() {
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
-        <TouchableOpacity
-          onPressIn={handlePressIn}
-          onPressOut={handlePressOut}
-        >
+        <TouchableOpacity onPressIn={handlePressIn} onPressOut={handlePressOut}>
           <View style={styles.logo}>
             <FontAwesome5 name="shopping-cart" size={32} color="#fff" />
           </View>
@@ -87,7 +91,10 @@ export default function TabTwoScreen() {
                 <View style={{ flexDirection: "row", alignItems: "center" }}>
                   <TouchableOpacity
                     onPress={() => handleDecrement(item)}
-                    style={[styles.qtyButton, { opacity: item.quantity === 1 ? 0.5 : 1 }]}
+                    style={[
+                      styles.qtyButton,
+                      { opacity: item.quantity === 1 ? 0.5 : 1 },
+                    ]}
                     disabled={item.quantity === 1}
                   >
                     <Text style={styles.qtyButtonText}>-</Text>
@@ -97,7 +104,9 @@ export default function TabTwoScreen() {
                     onPress={() => handleIncrement(item)}
                     style={[
                       styles.qtyButton,
-                      { opacity: item.quantity === (item.stock ?? 99) ? 0.5 : 1 },
+                      {
+                        opacity: item.quantity === (item.stock ?? 99) ? 0.5 : 1,
+                      },
                     ]}
                     disabled={item.quantity === (item.stock ?? 99)}
                   >
