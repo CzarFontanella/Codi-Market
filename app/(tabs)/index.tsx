@@ -18,6 +18,7 @@ export default function HomeScreen() {
 
   const { addToCart, cart } = useCart();
 
+
   useEffect(() => {
     const fetchProducts = async () => {
       const db = getFirestore(app);

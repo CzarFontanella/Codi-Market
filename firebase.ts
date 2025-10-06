@@ -12,5 +12,24 @@ const firebaseConfig = {
   appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
 };
 
+// Warn if any config value is missing
+if (
+  !firebaseConfig.apiKey ||
+  !firebaseConfig.authDomain ||
+  !firebaseConfig.projectId ||
+  !firebaseConfig.storageBucket ||
+  !firebaseConfig.messagingSenderId ||
+  !firebaseConfig.appId
+) {
+  console.warn(
+    "[Firebase] One or more Firebase config values are missing or undefined:",
+    firebaseConfig
+  );
+}
+
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
+
+if (__DEV__) {
+  console.log("Firebase Config:", firebaseConfig);
+}
